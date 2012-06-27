@@ -5,30 +5,30 @@ class BasicGate(Node):
     nr = 0
     def __init__(self, name='GATE%d'):
         Node.__init__(self, name)
-        self.addInput('A')
-        self.addInput('B')
-        self.addOutput('OUT')
+        self.add_input('A')
+        self.add_input('B')
+        self.add_output('OUT')
         self.lastout = 0
 
     def timeslice(self, time):
         Node.timeslice(self, time)
 
-        A = self.inPortStates['A']
-        B = self.inPortStates['B']
+        A = self.in_port_states['A']
+        B = self.in_port_states['B']
 
-        aevent = self.eventAvailable('A',time)
-        bevent = self.eventAvailable('B',time)
+        aevent = self.event_available('A',time)
+        bevent = self.event_available('B',time)
         if aevent:
-            aevent.setProcessed()
+            aevent.set_processed()
             A = aevent.state
-        if self.inEvents.has_key('B'):
-            bevent.setProcessed()
+        if self.in_events.has_key('B'):
+            bevent.set_processed()
             B = bevent.state
 
         result = self.operator(A, B)
         if result != self.lastout:
             self.lastout = result
-            self.sendStateChange('OUT', result, time)
+            self.send_state_change('OUT', result, time)
 
         self.timeslice_updatestates(time)
 
@@ -37,21 +37,21 @@ class NOT(Node):
     nr = 0
     def __init__(self, name='NOT%d'):
         Node.__init__(self, name)
-        self.addInput('IN')
-        self.addOutput('OUT')
+        self.add_input('IN')
+        self.add_output('OUT')
 
     def timeslice(self, time):
         Node.timeslice(self,time)
 
-        ev = self.eventAvailable('IN',time)
+        ev = self.event_available('IN',time)
         if ev:
             newstate = int(not ev.state)
-            ev.setProcessed()
+            ev.set_processed()
         else:
-            newstate = int(not self.inPortStates['IN'])
+            newstate = int(not self.in_port_states['IN'])
 
-        if self.outPortStates['OUT'] != newstate:
-            self.sendStateChange('OUT',newstate, time)
+        if self.out_port_states['OUT'] != newstate:
+            self.send_state_change('OUT',newstate, time)
 
         self.timeslice_updatestates(time)
 

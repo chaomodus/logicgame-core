@@ -7,7 +7,7 @@ class Event(object):
         self.processed = False
         self.originspec = originspec
 
-    def setProcessed(self):
+    def set_processed(self):
         self.processed = True
 
 class StateChangeEvent(Event):
@@ -35,27 +35,27 @@ class Node(object):
         self.__class__.nr = self.__class__.nr + 1
 
         self.lastslice = 0
-        self.inEvents = dict()
+        self.in_events = dict()
 
-        self.inputPorts = list()
-        self.outputPorts = list()
+        self.input_ports = list()
+        self.output_ports = list()
 
-        self.connectedOutputs = dict()
-        self.inPortStates = dict()
-        self.outPortStates = dict()
+        self.connected_outputs = dict()
+        self.in_port_states = dict()
+        self.out_port_states = dict()
 
-    def addInput(self, input, state=0):
-        self.inputPorts.append(input)
-        self.inPortStates[input] = state
+    def add_input(self, input, state=0):
+        self.input_ports.append(input)
+        self.in_port_states[input] = state
 
-    def addOutput(self, output, state=0):
-        self.outputPorts.append(output)
-        self.outPortStates[output] = state
+    def add_output(self, output, state=0):
+        self.output_ports.append(output)
+        self.out_port_states[output] = state
 
 
-    def eventAvailable(self, port, time):
-        if self.inEvents.has_key(port) and time != self.inEvents[port].time:
-            return self.inEvents[port]
+    def event_available(self, port, time):
+        if self.in_events.has_key(port) and time != self.in_events[port].time:
+            return self.in_events[port]
         else:
             return None
 
@@ -63,58 +63,58 @@ class Node(object):
         self.lastslice = time
 
     def timeslice_updatestates(self, time):
-        evsAvail = self.inEvents.keys()
+        evsAvail = self.in_events.keys()
         for port in evsAvail:
-            if self.inEvents[port].processed:
-                self.inPortStates[port] = self.inEvents[port].state
-                del self.inEvents[port]
+            if self.in_events[port].processed:
+                self.in_port_states[port] = self.in_events[port].state
+                del self.in_events[port]
 
-    def connectOutput(self, output, destination, destinationPort):
-        if output in self.outputPorts:
-            if not self.connectedOutputs.has_key(output):
-                self.connectedOutputs[output] = list()
-            self.connectedOutputs[output].append((destination, destinationPort))
+    def connect_output(self, output, destination, destination_port):
+        if output in self.output_ports:
+            if not self.connected_outputs.has_key(output):
+                self.connected_outputs[output] = list()
+            self.connected_outputs[output].append((destination, destination_port))
 
         else:
             raise NoPort()
 
-    def sendStateChange(self, output, state, time):
-        if output in self.outputPorts:
-            self.outPortStates[output] = state
-            if self.connectedOutputs.has_key(output):
+    def send_state_change(self, output, state, time):
+        if output in self.output_ports:
+            self.out_port_states[output] = state
+            if self.connected_outputs.has_key(output):
                 newevent = StateChangeEvent(self, output, time, state)
-                for dest,destport in self.connectedOutputs[output]:
-                    dest.recvStateChange(destport, newevent)
+                for dest,destport in self.connected_outputs[output]:
+                    dest.recv_state_change(destport, newevent)
 
         else:
             raise NoPort()
 
-    def recvStateChange(self, port, event):
+    def recv_state_change(self, port, event):
         if DEBUG:
             print 'RECV: %s:%s %s' % (self.name, port, event)
-        if port in self.inputPorts:
-            self.inEvents[port] = event
+        if port in self.input_ports:
+            self.in_events[port] = event
         else:
             raise NoPort()
 
 class ClockedMixin(object):
     nr = 0
     def __init__(self):
-        self.addInput('CLK')
+        self.add_input('CLK')
 
     def timeslice(self, time):
-        ev = self.eventAvailable('CLK',time)
+        ev = self.event_available('CLK',time)
         if ev:
-            if (ev.state == 1) and (self.inPortStates['CLK'] == 0):
-                self.clkRise(time)
-            elif (ev.state == 0) and (self.inPortStates['CLK'] == 1):
-                self.clkFall(time)
-            ev.setProcessed()
+            if (ev.state == 1) and (self.in_port_states['CLK'] == 0):
+                self.clk_rise(time)
+            elif (ev.state == 0) and (self.in_port_states['CLK'] == 1):
+                self.clk_fall(time)
+            ev.set_processed()
 
-    def clkRise(self):
+    def clk_rise(self):
         pass
 
-    def clkFall(self):
+    def clk_fall(self):
         pass
 
 

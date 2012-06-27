@@ -12,11 +12,11 @@ class NodePackage(Node):
         for node in self.contents:
             node.timeslice(time)
 
-    def addVirtualInput(self, input, state=0):
+    def add_virtual_input(self, input, state=0):
         pass
 
-    def addVirtualOutput(self, input, state=0):
+    def add_virtual_output(self, input, state=0):
         pass
 
-    def addNode(self, node):
+    def add_node(self, node):
 
