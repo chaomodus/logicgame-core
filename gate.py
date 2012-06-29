@@ -56,6 +56,20 @@ class NOT(Node):
         self.timeslice_updatestates(time)
 
 
+class Delay(NOT):
+    nr = 0
+    def __init__(self, name='DLY%d', delay=1):
+        NOT.__init__(self, name)
+        self.delay_amount = delay
+        self.delay_left = delay
+
+    def timeslice(self, time):
+        # FIXME make time aware like Clock is. Assume we get one timeslice per timeslice for now.
+        if self.delay_left == 0:
+            self.delay_left = self.delay_amount
+            return NOT.timeslice(self, time)
+        self.delay_left -= 1
+
 
 class AND(BasicGate):
     nr = 0
