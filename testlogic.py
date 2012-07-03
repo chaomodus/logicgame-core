@@ -1,20 +1,21 @@
-import gate
-import simulator
-import clock
+import logic
+import logic.gate
+import logic.simulator
+import logic.clock
 
-a = gate.AND()
-b = gate.OR()
+a = logic.gate.AND()
+b = logic.gate.OR()
 
-c = clock.Clock(period=5)
-c1 = clock.Clock(period=5,state=1)
+c = logic.clock.Clock(period=5)
+c1 = logic.clock.Clock(period=5,state=1)
 
-n = gate.NOT()
-n1 = gate.NOT()
-n2 = gate.NOT()
-n3 = gate.NOT()
-n4 = gate.NOT()
-n5 = gate.NOT()
-n6 = gate.NOT()
+n = logic.gate.NOT()
+n1 = logic.gate.NOT()
+n2 = logic.gate.NOT()
+n3 = logic.gate.NOT()
+n4 = logic.gate.NOT()
+n5 = logic.gate.NOT()
+n6 = logic.gate.NOT()
 n.connect_output('OUT',n1,'IN')
 n1.connect_output('OUT',n2,'IN')
 n2.connect_output('OUT',n3,'IN')
@@ -28,7 +29,7 @@ c.connect_output('CLK',a,'B')
 n4.connect_output('OUT',b,'A')
 c.connect_output('CLK',b,'B')
 
-mysim = simulator.TestSimulator()
+mysim = logic.simulator.TestSimulator()
 mysim.add_node(a)
 mysim.add_node(b)
 mysim.add_node(c)
@@ -41,4 +42,4 @@ mysim.add_node(n4)
 mysim.add_node(n5)
 mysim.add_node(n6)
 mysim.run(1,150)
-print simulator.format_record(mysim.recorded_output,gatefilter=(c.name,c1.name,a.name,b.name))
+print logic.simulator.format_record(mysim.recorded_output,gatefilter=(c.name,c1.name,a.name,b.name))

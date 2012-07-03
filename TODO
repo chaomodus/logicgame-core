@@ -3,13 +3,13 @@ NodePackage
   Like ICs in R.O.; Simulator on the inside, Node on the outside. - IN PROGRESS
 
 DelayLine
-  Simulates N NOT gates stacked together, creating slice-wise delays.
+  Simulates N NOT gates stacked together, creating slice-wise delays. - IN PROGRESS
 
 Flip Flops / Registers
   Will implement 1 slice flipflops, and discrete flipflops using gates (depends on NodePackage).
-
-
-
+  D Flip Flop
+  JK Flip Flop
+  SR Flip Flop
 
 
 
