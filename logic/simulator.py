@@ -30,6 +30,34 @@ class Simulator(object):
                 node.timeslice(self.frame)
 
 
+class TSMixin(object):
+    def __init__(self, samplerate=1):
+        self.recorded_output = dict()
+        self.samplerate = samplerate
+        self.samplesleft = self.samplerate
+
+    def add_node(self, node):
+        Simulator.add_node(self, node)
+        self.recorded_output[node.name] = dict()
+        for i in node.output_ports:
+            self.recorded_output[node.name][i] = list()
+
+    def reset(self):
+        for i in self.recorded_output.keys():
+            for j in self.recorded_output[i].keys():
+                self.recorded_output[i][j] = list()
+
+    def run(self, frames=1, count=1):
+        while (count):
+            Simulator.run(self, frames)
+            self.samplesleft -= 1
+            if (self.samplesleft <= 0):
+                for node in self.nodes:
+                    for port in node.output_ports:
+                        self.recorded_output[node.name][port].append(node.out_port_states[port])
+                self.samplesleft = self.samplerate
+            count = count - 1
+
 class TestSimulator(Simulator):
     def __init__(self):
         Simulator.__init__(self)
