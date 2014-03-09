@@ -1,7 +1,7 @@
-import logic
-import logic.gate
-import logic.simulator
-import logic.clock
+import logic2
+import logic2.gate
+import logic2.simulator
+import logic2.clock
 
 a = logic.gate.AND()
 b = logic.gate.OR()
