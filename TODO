@@ -1,30 +1,22 @@
+unit tests for all objects.
 
-NodePackage
-  Like ICs in R.O.; Simulator on the inside, Node on the outside. - IN PROGRESS
+mux: 
+     Finish mux implementation.
+     Finish dmux implementanion.
 
-DelayLine
-  Simulates N NOT gates stacked together, creating slice-wise delays. - IN PROGRESS
-
-Flip Flops / Registers
-  Will implement 1 slice flipflops, and discrete flipflops using gates (depends on NodePackage).
-  D Flip Flop
-  JK Flip Flop
-  SR Flip Flop
+simulator:
+	finish generic container.
+	finish simulator with state recording.
 
 
+flip-flops
+delay lines
+real time clocks
 
-LATER:
+GUI support framework
 
-74 series chip alikes
-GUI / Real Time simulator
-
-
-
-
+game
 ???
-
-Game
-Profit
-
+profit
 
 
