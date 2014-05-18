@@ -1,22 +1,24 @@
-unit tests for all objects.
+unit tests for objects:
+   especially core behavior which is more complicated than is comfortable
+   the interaction between various methods
+   simulator
 
-mux: 
-     Finish mux implementation.
-     Finish dmux implementanion.
+I have a vague concept for a command-line simulator that you can take a gate, and make a list
+of frames you want to put he gate through, basically for testing - so on the command-line you'd
+specify a gate init string, and then a series of pin states specified in terms of frames, and then
+it'd print out the pin states over those frames.
 
 simulator:
 	finish generic container.
 	finish simulator with state recording.
 
 
-flip-flops
+flip-flops (impelement as a monolithic instant gate and using discrete LUT-based gates)
 delay lines
-real time clocks
+real time clocks (a clock component who's output is based on real time not on simulator time)
 
 GUI support framework
 
 game
 ???
 profit
-
-

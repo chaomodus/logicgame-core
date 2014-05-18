@@ -2,6 +2,7 @@ PIN_DIRECTION_IN = 0
 PIN_DIRECTION_OUT = 1
 
 import string
+import math
 
 invert = {0:1,1:0}
 
@@ -10,6 +11,7 @@ class DeplicatePinError(Exception):
 
 class Event(object):
     def __init__(self, time, value, origin, origin_pin, destination_pin):
+        self.time = time
         self.value = int(value)
         self.origin = origin
         self.origin_pin = origin_pin
@@ -100,9 +102,11 @@ class Base(object):
         # check all of the output pin states against the previous states and produce update events on differences
         for pin,value in self.next_pin_states.iteritems():
             if self.pin_states[pin] != value:
-                for conn in self.output_connections[pin]:
-                    newev = Event(time, value, self, pin, conn.pin_name)
-                    conn.send_event(newev)
+                if self.output_connections.has_key(pin):
+                    for conn in self.output_connections[pin]:
+                        newev = Event(time, value, self, pin, conn.pin_name)
+                        conn.send_event(newev)
+                    self.pin_states[pin] = value
 
     def __repr__(self):
         return '<%s %s>' % (str(self.__class__.__name__), self.name)
@@ -112,16 +116,15 @@ def addr_range(bits):
         yield tuple([int(x) for x in tuple(string.rjust(bin(addr)[2:], bits, '0'))])
 
 class AddressableMixin(object):
-    def __init__(self, address_count, selector_prefix='SEL'):
+    def __init__(self, max_selector, selector_prefix='SEL'):
         self._a_m_sel_pins = list()
         self._a_m_curr_address = None
         self._a_m_prefix = selector_prefix
+        selector_bits = int(math.ceil(math.log(max_selector, 2.0)))
 
-        sel_count = int(math.ceil(math.log(address_count, 2)))
-
-        for i in range(sel_count):
-            self._add_pin('%s%d' % i, PIN_DIRECTION_OUT, 0)
-            self._a_m_sel_pins.append('%s%d' % i)
+        for i in range(selector_bits):
+            self._add_pin('%s%d' % (selector_prefix,i), PIN_DIRECTION_OUT, 0)
+            self._a_m_sel_pins.append('%s%d' % (selector_prefix,i))
 
     def get_address(self):
         return int("".join([str(self.next_pin_states[p]) for p in self._a_m_sel_pins]), 2)
