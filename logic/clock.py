@@ -2,7 +2,7 @@ import base
 import math
 
 sign = lambda x: math.copysign(1.0, x)
-squarewave = lambda time, period: (1+sign(((time - period / 2) % period) - period / 2)) / 2)
+squarewave = lambda time, period: ((1+sign(((time - period / 2) % period) - period / 2)) / 2)
 
 class Clock(base.Base):
     basename='CLK'
@@ -20,7 +20,7 @@ class Clock(base.Base):
             self.next_pin_states['CLK'] = self.init_phase
             self.basetime = time
         else:
-            sq = squarewave(time - basetime, self.peiod)
+            sq = squarewave(time - self.basetime, self.period)
             if self.init_phase:
                 self.next_pin_states['CLK'] = base.invert[sq]
             else:

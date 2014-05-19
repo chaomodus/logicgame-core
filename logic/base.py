@@ -29,7 +29,7 @@ class Pin(object):
         return not self.__eq__(other)
 
     def send_event(self, event):
-        return pin_holder.recv_event(self.pin_name, event)
+        return self.pin_holder.recv_event(event)
 
 
 
@@ -78,8 +78,8 @@ class Base(object):
         for p in self.output_connections[pin_name]:
             if newpin == p:
                 return None
-        self.output_connections.append(newpin)
-        newpin.send_event(Event(self.time, self.pin_states[pin_name], self, pin_name))
+        self.output_connections[pin_name].append(newpin)
+        newpin.send_event(Event(self.time, self.pin_states[pin_name], self, pin_name, partner_pin))
 
     def pin_changed_p(self, pin_name):
         return self.next_pin_states[pin_name] != self.pin_states[pin_name]
