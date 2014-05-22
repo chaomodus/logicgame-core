@@ -31,21 +31,35 @@ class Pin(object):
     def send_event(self, event):
         return self.pin_holder.recv_event(event)
 
+class Enumerator(object):
+    basename='ENUM'
+    _number=0
 
+    def __init__(self, name=None):
+        if name:
+            self.name = name
+        else:
+            self.name = self._next_name()
+
+    def _next_name(self, basename=None):
+        nr = self.__class__._number
+        self.__class__._number += 1
+        if not basename:
+            basename=self.basename
+        return basename + str(nr)
+
+    def __repr__(self):
+        return '<%s %s>' % (str(self.__class__.__name__), self.name)
 
 # recieve all input events, update next_state
 # call process method
 # update next state with output states
 # compare states and emit output events
-class Base(object):
-    basename='Base'
-    _number=0
+class Base(Enumerator):
+    basename='BASE'
 
     def __init__(self, name=None, init_time = 0):
-        if name:
-            self.name = name
-        else:
-            self.name = self._next_name()
+        Enumerator.__init__(self, name)
 
         self.input_event_queue = list()
 
@@ -55,14 +69,6 @@ class Base(object):
         self.output_connections = dict()
 
         self.time = init_time
-
-    def _next_name(self, basename=None):
-        nr = self.__class__._number
-        self.__class__._number += 1
-        if not basename:
-            basename=self.basename
-        return basename + str(nr)
-
 
     def _add_pin(self, pin_name, pin_direction, init_state=0):
         if self.pin_info.has_key(pin_name):
@@ -108,8 +114,25 @@ class Base(object):
                         conn.send_event(newev)
                     self.pin_states[pin] = value
 
-    def __repr__(self):
-        return '<%s %s>' % (str(self.__class__.__name__), self.name)
+class Passthrough(Base):
+    basename='PT'
+
+    def __init__(self, name=None):
+        Base.__init__(self, name)
+        self.connections = dict()
+
+    def add_pin(self, pin_name, pin_direction, pin_connection=None):
+        self._add_pin(pin_name, pin_direction)
+        if pin_direction == PIN_DIRECTION_IN and pin_connection:
+            if not self.connections.has_key(pin_name):
+                self.connections[pin_name] = list()
+            self.connections[pin_name].append(pin_connection)
+
+    def execute(self, time):
+        for p, conns in self.connections.items():
+            for c in conns:
+                if self.pin_states.has_key(c):
+                    self.next_pin_states[c] = self.next_pin_states[p]
 
 def addr_range(bits):
     for addr in xrange(2**bits):

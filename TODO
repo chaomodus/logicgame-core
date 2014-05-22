@@ -8,10 +8,8 @@ of frames you want to put he gate through, basically for testing - so on the com
 specify a gate init string, and then a series of pin states specified. in terms of frames, and then
 it'd print out the pin states over those frames.
 
-implement Package object which is a container with inputs and outpus.
-
 flip-flops (impelement as a monolithic instant gate and using discrete LUT-based gates)
-delay lines
+delay lines (???)
 real time clocks (a clock component who's output is based on real time not on simulator time)
 
 GUI support framework
