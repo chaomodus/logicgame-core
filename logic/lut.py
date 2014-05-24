@@ -14,10 +14,6 @@ class LUT(base.Base):
             self._add_pin('IN%d' % p, base.PIN_DIRECTION_IN)
             self.in_pins.append('IN%d' % p)
 
-        # LUTs will obviously have outputs dependent on the table without any connected pins.
-        self.execute(0)
-        self.process_outputs(0)
-
     def execute(self, time):
         key = tuple([self.next_pin_states[p] for p in self.in_pins])
 

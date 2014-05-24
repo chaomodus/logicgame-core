@@ -57,11 +57,14 @@ class Package(base.Enumerator, Container):
 
     def connect_pin_internal_input(self, pin_name, partner_object, partner_pin):
         if self.INPUTS.pin_info.has_key(pin_name):
-            self.INPUTS.connect_pin(self, pin_name+'.OUT', partner_object, partner_pin)
+            self.INPUTS.connect_pin(pin_name+'.OUT', partner_object, partner_pin)
 
     def connect_pin_internal_output(self, pin_name, partner_object, partner_pin):
         if self.OUTPUTS.pin_info.has_key(pin_name):
             partner_object.connect_pin(partner_pin, self.OUTPUTS, pin_name+'.IN')
+
+    def connect_pin_internal_passthrough(self, in_pin, out_pin):
+        self.INPUTS.connect_pin(in_pin+'.OUT', self.OUTPUTS, out_pin+'.IN')
 
     @property
     def pin_states(self):
