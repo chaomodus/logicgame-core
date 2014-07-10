@@ -6,6 +6,12 @@ import math
 
 invert = {0:1,1:0}
 
+def staticvariable(variable, defaultvalue):
+    def decorate(func):
+        setattr(func, variable, defaultvalue)
+        return func
+    return decorate
+
 class DeplicatePinError(Exception):
     pass
 
@@ -51,10 +57,10 @@ class Enumerator(object):
     def __repr__(self):
         return '<%s %s>' % (str(self.__class__.__name__), self.name)
 
-# recieve all input events, update next_state
-# call process method
-# update next state with output states
-# compare states and emit output events
+# recieve all input events, update next_state (process_inputs)
+# call process method (execute)
+# update next state with output states (done in execute)
+# compare states and emit output events (process_outputs)
 class Base(Enumerator):
     basename='BASE'
 

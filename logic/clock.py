@@ -1,4 +1,4 @@
-import base
+from . import base
 import math
 
 sign = lambda x: math.copysign(1.0, x)

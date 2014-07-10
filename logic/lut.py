@@ -1,4 +1,4 @@
-import base
+from . import base
 
 class LUT(base.Base):
     basename='LUT'

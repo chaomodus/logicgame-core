@@ -1,4 +1,4 @@
-import base
+from . import base
 
 class MUX(base.AddressableMixin, base.Base):
     basename='MUX'

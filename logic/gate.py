@@ -1,57 +1,51 @@
-import base
-import lut
+from . import base
+from .base import staticvariable
+from . import lut
 
-ANDCNT=0
-ORCNT=0
-NORCNT=0
-NANDCNT=0
-XORCNT=0
-XNORCNT=0
-
+@staticvariable('cnt', 0)
 def AND(bits, name=None):
-    global ANDCNT
     if not name:
-        name='AND' + str(ANDCNT)
-        ANDCNT+=1
+        name='AND' + str(AND.cnt)
+        AND.cnt+=1
 
     return lut.LUT(lut.generate_AND(bits), name=name)
 
+@staticvariable('cnt', 0)
 def OR(bits, name=None):
-    global ORCNT
     if not name:
-        name='OR' + str(ORCNT)
-        ORCNT+=1
+        name='OR' + str(OR.cnt)
+        OR.cnt+=1
 
     return lut.LUT(lut.generate_OR(bits), name=name)
 
+@staticvariable('cnt', 0)
 def NOR(bits, name=None):
-    global NORCNT
     if not name:
-        name='NOR' + str(NORCNT)
-        NORCNT+=1
+        name='NOR' + str(NOR.cnt)
+        NOR.cnt+=1
 
     return lut.LUT(lut.generate_NOR(bits), name=name)
 
+@staticvariable('cnt', 0)
 def NAND(bits, name=None):
-    global NANDCNT
     if not name:
-        name='NAND' + str(NANDCNT)
-        NANDCNT+=1
+        name='NAND' + str(NAND.cnt)
+        NAND.cnt+=1
 
     return lut.LUT(lut.generate_NAND(bits), name=name)
 
+@staticvariable('cnt', 0)
 def XOR(bits, name=None):
-    global XORCNT
     if not name:
-        name='XOR' + str(XORCNT)
-        XORCNT+=1
+        name='XOR' + str(XOR.cnt)
+        XOR.cnt+=1
 
     return lut.LUT(lut.generate_XOR(bits), name=name)
 
+@staticvariable('cnt', 0)
 def XNOR(bits, name=None):
-    global XNORCNT
     if not name:
-        name='XNOR' + str(XNORCNT)
-        XNORCNT+=1
+        name='XNOR' + str(XNOR.cnt)
+        XNOR.cnt+=1
 
     return lut.LUT(lut.generate_XNOR(bits), name=name)
