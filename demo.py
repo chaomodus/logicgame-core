@@ -4,6 +4,9 @@ import logic.container as container
 import logic.base as base
 import sys
 
+# This is a sort of testbed for trying out things, more than a demo. But it demonstrates
+# how to use the package system, and also how the general API works and how to write a
+# basic interface.
 
 class P_DFLIPFLOP(container.Package):
     basename='PDFF'
