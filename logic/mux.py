@@ -1,6 +1,14 @@
+"""Multiplexers and Demultiplexers.
+
+These gates map either N inputs to one output (with SEL inputs) [mux], or N outputs to one input (with SEL inputs) [demux].
+"""
+
 from . import base
 
 class MUX(base.AddressableMixin, base.Base):
+    """Multiplexer. For a given number of inputs, enough SELn inputs are created (binary address).
+    Setting the SEL to a desired address connects a given INn to the OUT, so all events to the INn
+    will be sent to the OUT."""
     basename='MUX'
 
     def __init__(self, input_count=2, name=None):
@@ -22,6 +30,10 @@ class MUX(base.AddressableMixin, base.Base):
 
 
 class DEMUX(base.AddressableMixin, base.Base):
+    """Demultiplexer. For a given number of inputs, enough SELn inputs are created (binary address).
+    Setting the SEL to a desired address connects a given OUTn to the IN, so all events to the IN
+    will be sent to the OUTn."""
+
     basename='DEMUX'
 
     def __init__(self, output_count=2, name=None):

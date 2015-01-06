@@ -1,3 +1,9 @@
+"""Generic, basic gates (such as AND gates).
+
+This is implemented as a set of callables which maintain their enumerated
+state, and return a LUT object with the proper look up table for their function
+and number of bits (inputs)."""
+
 from . import base
 from .base import staticvariable
 from . import lut
