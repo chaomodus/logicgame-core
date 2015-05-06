@@ -1,3 +1,6 @@
+"""Base classes with much of the core event-passing functionality, connectivity
+and utilities for implementing gates."""
+
 PIN_DIRECTION_IN = 0
 PIN_DIRECTION_OUT = 1
 
@@ -19,6 +22,7 @@ class DuplicatePinError(Exception):
 
 
 class Event(object):
+    """A very simple event state object."""
     def __init__(self, time, value, origin, origin_pin, destination_pin):
         self.time = time
         self.value = int(value)
@@ -28,6 +32,7 @@ class Event(object):
 
 
 class Pin(object):
+    """Represents a pin, holder of connectivity state."""
     def __init__(self, pin_holder, pin_name):
         self.pin_holder = pin_holder
         self.pin_name = pin_name
@@ -62,14 +67,21 @@ class Enumerator(object):
     def __repr__(self):
         return "<{class} {name}>".format(self.__class__.__name__, self.name)
 
-# recieve all input events, update next_state (process_inputs)
-# call process method (execute)
-# update next state with output states (done in execute)
-# compare states and emit output events (process_outputs)
-
 
 class Base(Enumerator):
-    basename = 'BASE'
+    """Base class for all gates. Implements connectivity and event passing.
+
+Order of method calls in simulation:
+
+* recieve all input events, update next_state (process_inputs)
+* call process method (execute)
+* update next state with output states (done in execute)
+* compare states and emit output events (process_outputs)
+
+Most functionality of descended gates is implemented in execute, which looks
+at the contents of next_pin_states and updates those contents as needed.
+"""
+    basename='BASE'
 
     def __init__(self, name=None, init_time=0):
         Enumerator.__init__(self, name)
@@ -134,6 +146,8 @@ class Base(Enumerator):
 
 
 class Passthrough(Base):
+    """A very simple gate which allows internal connections between pins to
+       pass state between inputs and outputs."""
     basename = 'PT'
 
     def __init__(self, name=None):
@@ -155,11 +169,15 @@ class Passthrough(Base):
 
 
 def addr_range(bits):
+    """Generate a bitmap for each enumerated address for a given number of
+       bits."""
     for addr in xrange(2**bits):
         yield tuple([int(x) for x in
                      tuple(string.rjust(bin(addr)[2:], bits, '0'))])
 
 class AddressableMixin(object):
+    """A mixin which adds SELn inputs to a gate for selecting an enumerated
+       address."""
     def __init__(self, max_selector, selector_prefix='SEL'):
         self._a_m_sel_pins = list()
         self._a_m_curr_address = None
@@ -179,6 +197,8 @@ class AddressableMixin(object):
 
 
 class NOT(Base):
+    """A very simple gate which inverts the value of events sent to its IN
+       port and sends them to its OUT port."""
     basename = 'NOT'
 
     def __init__(self, name=None):

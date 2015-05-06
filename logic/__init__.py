@@ -1,3 +1,5 @@
+"""Base components for gate-level logic simulation similar to Robot Odyssey."""
+
 from . import base
 from . import clock
 from . import container

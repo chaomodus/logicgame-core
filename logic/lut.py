@@ -1,7 +1,14 @@
+"""Implement Look Up Table gates, which are generic gates, utilizing a look up
+table to map certain sets of inputs into certain sets of outputs.
+
+Contains generators for creating the LUTs for the base gates."""
+
 from . import base
 
 
 class LUT(base.Base):
+    """Look Up Table gate."""
+
     basename = 'LUT'
 
     def __init__(self, table, name=None):

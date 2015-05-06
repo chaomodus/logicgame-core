@@ -1,3 +1,5 @@
+"""A simple round-based clock implementation."""
+
 from . import base
 import math
 
@@ -6,6 +8,7 @@ squarewave = lambda time, period: ((1+sign(((time - period / 2) % period) - peri
 
 
 class Clock(base.Base):
+    """Output a square wave to the OUT pin in the specified period."""
     basename = 'CLK'
 
     def __init__(self, period=1, phase=0, name=None):

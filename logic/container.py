@@ -1,9 +1,13 @@
+"""Several container objects which are intended to contain and execute
+   gates."""
+
 from . import base
 
-
 class Container(object):
-    # super generic container takes care of sequencing the execution of its
-    # contents as one cycle.does not fully implement the base protocol
+    """Base container class which properly sequences the execution of its contents.
+       Does not fully implement the base protocol (does not itself act as a
+       gate)."""
+
     def __init__(self):
         self.contents = list()
 
@@ -17,8 +21,8 @@ class Container(object):
 
 
 class Package(base.Enumerator, Container):
-    # less generic container, implements the full base protocol and has inputs
-    # and outputs
+    """A non-generic container which has inputs and outputs (thus acting as a
+       gate)."""
     basename = 'PKG'
 
     def __init__(self, name=None):
@@ -80,8 +84,11 @@ class Package(base.Enumerator, Container):
 
 
 class Simulator(Container):
-    # a less generic container, does not implement full base prototocol, but
-    # collects data from its contents at each execution
+    """A container intended to be the starting point for implementing or
+       holding gates for interfaces.
+
+       Does not act as a gate."""
+
     def __init__(self):
         Container.__init__(self)
         self.data = list()
