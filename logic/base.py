@@ -71,17 +71,18 @@ class Enumerator(object):
 class Base(Enumerator):
     """Base class for all gates. Implements connectivity and event passing.
 
-Order of method calls in simulation:
+       Order of method calls in simulation:
 
-* recieve all input events, update next_state (process_inputs)
-* call process method (execute)
-* update next state with output states (done in execute)
-* compare states and emit output events (process_outputs)
+       * recieve all input events, update next_state (process_inputs)
+       * call process method (execute)
+       * update next state with output states (done in execute)
+       * compare states and emit output events (process_outputs)
 
-Most functionality of descended gates is implemented in execute, which looks
-at the contents of next_pin_states and updates those contents as needed.
+       Most functionality of descended gates is implemented in execute, which
+       looks at the contents of next_pin_states and updates those contents as
+       needed.
 """
-    basename='BASE'
+    basename = 'BASE'
 
     def __init__(self, name=None, init_time=0):
         Enumerator.__init__(self, name)
@@ -127,6 +128,7 @@ at the contents of next_pin_states and updates those contents as needed.
             if ev.time <= time:
                 if ev.destination_pin in self.next_pin_states:
                     self.next_pin_states[ev.destination_pin] = ev.value
+        self.input_event_queue = list()
 
     def execute(self, time):
         # to be implemented by the gates in question (examine next input states
