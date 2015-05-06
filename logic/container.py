@@ -1,9 +1,9 @@
 from . import base
-from collections import defaultdict
 
-# super generic container takes care of sequencing the execution of its contents as one cycle.
-# does not fully implement the base protocol
+
 class Container(object):
+    # super generic container takes care of sequencing the execution of its
+    # contents as one cycle.does not fully implement the base protocol
     def __init__(self):
         self.contents = list()
 
@@ -15,8 +15,10 @@ class Container(object):
         [g.execute(tm) for g in self.contents]
         [g.process_outputs(tm) for g in self.contents]
 
-# less generic container, implements the full base protocol and has inputs and outputs
+
 class Package(base.Enumerator, Container):
+    # less generic container, implements the full base protocol and has inputs
+    # and outputs
     basename = 'PKG'
 
     def __init__(self, name=None):
@@ -30,7 +32,7 @@ class Package(base.Enumerator, Container):
         self.INPUTS.execute(tm)
         self.INPUTS.process_outputs(tm)
 
-        Container.execute(self,tm)
+        Container.execute(self, tm)
 
         self.OUTPUTS.process_inputs(tm)
         self.OUTPUTS.execute(tm)
@@ -47,21 +49,25 @@ class Package(base.Enumerator, Container):
     def process_outputs(self, tm):
         self.OUTPUTS.process_outputs(tm)
 
-    def add_pin(self, pin_name, pin_direction):
+    def add_pin(self, pin, pin_direction):
         if pin_direction == base.PIN_DIRECTION_IN:
-            self.INPUTS.add_pin(pin_name+'.OUT', base.PIN_DIRECTION_OUT)
-            self.INPUTS.add_pin(pin_name, base.PIN_DIRECTION_IN, pin_name+'.OUT')
+            self.INPUTS.add_pin(pin+'.OUT', base.PIN_DIRECTION_OUT)
+            self.INPUTS.add_pin(pin,
+                                base.PIN_DIRECTION_IN,
+                                pin+'.OUT')
         else:
-            self.OUTPUTS.add_pin(pin_name+'.IN', base.PIN_DIRECTION_IN, pin_name)
-            self.OUTPUTS.add_pin(pin_name, base.PIN_DIRECTION_OUT)
+            self.OUTPUTS.add_pin(pin+'.IN',
+                                 base.PIN_DIRECTION_IN,
+                                 pin)
+            self.OUTPUTS.add_pin(pin, base.PIN_DIRECTION_OUT)
 
-    def connect_pin_internal_input(self, pin_name, partner_object, partner_pin):
-        if self.INPUTS.pin_info.has_key(pin_name):
-            self.INPUTS.connect_pin(pin_name+'.OUT', partner_object, partner_pin)
+    def connect_pin_internal_input(self, pin, partner_object, partner_pin):
+        if pin in self.INPUTS.pin_info:
+            self.INPUTS.connect_pin(pin+'.OUT', partner_object, partner_pin)
 
-    def connect_pin_internal_output(self, pin_name, partner_object, partner_pin):
-        if self.OUTPUTS.pin_info.has_key(pin_name):
-            partner_object.connect_pin(partner_pin, self.OUTPUTS, pin_name+'.IN')
+    def connect_pin_internal_output(self, pin, partner_object, partner_pin):
+        if pin in self.OUTPUTS.pin_info:
+            partner_object.connect_pin(partner_pin, self.OUTPUTS, pin+'.IN')
 
     def connect_pin_internal_passthrough(self, in_pin, out_pin):
         self.INPUTS.connect_pin(in_pin+'.OUT', self.OUTPUTS, out_pin+'.IN')
@@ -73,8 +79,9 @@ class Package(base.Enumerator, Container):
         return outp
 
 
-# a less generic container, does not implement full base prototocol, but collects data from its contents at each execution
 class Simulator(Container):
+    # a less generic container, does not implement full base prototocol, but
+    # collects data from its contents at each execution
     def __init__(self):
         Container.__init__(self)
         self.data = list()
@@ -88,9 +95,9 @@ class Simulator(Container):
     def execute(self, tm):
         Container.execute(self, tm)
 
-        frame=dict()
+        frame = dict()
         for g in self.contents:
             frame[g.name] = g.pin_states.copy()
 
         # collect gate states
-        self.data.append((tm,frame))
+        self.data.append((tm, frame))

@@ -4,7 +4,8 @@ PIN_DIRECTION_OUT = 1
 import string
 import math
 
-invert = {0:1,1:0}
+invert = {0: 1, 1: 0}
+
 
 def staticvariable(variable, defaultvalue):
     def decorate(func):
@@ -12,8 +13,10 @@ def staticvariable(variable, defaultvalue):
         return func
     return decorate
 
-class DeplicatePinError(Exception):
+
+class DuplicatePinError(Exception):
     pass
+
 
 class Event(object):
     def __init__(self, time, value, origin, origin_pin, destination_pin):
@@ -22,6 +25,7 @@ class Event(object):
         self.origin = origin
         self.origin_pin = origin_pin
         self.destination_pin = destination_pin
+
 
 class Pin(object):
     def __init__(self, pin_holder, pin_name):
@@ -37,9 +41,10 @@ class Pin(object):
     def send_event(self, event):
         return self.pin_holder.recv_event(event)
 
+
 class Enumerator(object):
-    basename='ENUM'
-    _number=0
+    basename = 'ENUM'
+    _number = 0
 
     def __init__(self, name=None):
         if name:
@@ -51,20 +56,22 @@ class Enumerator(object):
         nr = self.__class__._number
         self.__class__._number += 1
         if not basename:
-            basename=self.basename
+            basename = self.basename
         return basename + str(nr)
 
     def __repr__(self):
-        return '<%s %s>' % (str(self.__class__.__name__), self.name)
+        return "<{class} {name}>".format(self.__class__.__name__, self.name)
 
 # recieve all input events, update next_state (process_inputs)
 # call process method (execute)
 # update next state with output states (done in execute)
 # compare states and emit output events (process_outputs)
-class Base(Enumerator):
-    basename='BASE'
 
-    def __init__(self, name=None, init_time = 0):
+
+class Base(Enumerator):
+    basename = 'BASE'
+
+    def __init__(self, name=None, init_time=0):
         Enumerator.__init__(self, name)
 
         self.input_event_queue = list()
@@ -77,11 +84,12 @@ class Base(Enumerator):
         self.time = init_time
 
     def _add_pin(self, pin_name, pin_direction, init_state=0):
-        if self.pin_info.has_key(pin_name):
+        if pin_name in self.pin_info:
             raise DuplicatePinError()
         self.pin_states[pin_name] = init_state
         self.next_pin_states[pin_name] = init_state
-        self.pin_info[pin_name] = {'direction':pin_direction, 'init_state':init_state}
+        self.pin_info[pin_name] = {'direction': pin_direction,
+                                   'init_state': init_state}
         if pin_direction:
             self.output_connections[pin_name] = list()
 
@@ -91,7 +99,9 @@ class Base(Enumerator):
             if newpin == p:
                 return None
         self.output_connections[pin_name].append(newpin)
-        newpin.send_event(Event(self.time, self.pin_states[pin_name], self, pin_name, partner_pin))
+        newpin.send_event(Event(self.time,
+                                self.pin_states[pin_name],
+                                self, pin_name, partner_pin))
 
     def pin_changed_p(self, pin_name):
         return self.next_pin_states[pin_name] != self.pin_states[pin_name]
@@ -103,25 +113,28 @@ class Base(Enumerator):
         # update next_state based on input events.
         for ev in self.input_event_queue:
             if ev.time <= time:
-                if self.next_pin_states.has_key(ev.destination_pin):
+                if ev.destination_pin in self.next_pin_states:
                     self.next_pin_states[ev.destination_pin] = ev.value
 
     def execute(self, time):
-        # to be implemented by the gates in question (examine next input states and update output states based on differences).
+        # to be implemented by the gates in question (examine next input states
+        # and update output states based on differences).
         raise NotImplementedError()
 
     def process_outputs(self, time):
-        # check all of the output pin states against the previous states and produce update events on differences
-        for pin,value in self.next_pin_states.iteritems():
+        # check all of the output pin states against the previous states and
+        # produce update events on differences
+        for pin, value in self.next_pin_states.iteritems():
             if self.pin_states[pin] != value:
-                if self.output_connections.has_key(pin):
+                if pin in self.output_connections:
                     for conn in self.output_connections[pin]:
                         newev = Event(time, value, self, pin, conn.pin_name)
                         conn.send_event(newev)
                     self.pin_states[pin] = value
 
+
 class Passthrough(Base):
-    basename='PT'
+    basename = 'PT'
 
     def __init__(self, name=None):
         Base.__init__(self, name)
@@ -130,19 +143,21 @@ class Passthrough(Base):
     def add_pin(self, pin_name, pin_direction, pin_connection=None):
         self._add_pin(pin_name, pin_direction)
         if pin_direction == PIN_DIRECTION_IN and pin_connection:
-            if not self.connections.has_key(pin_name):
+            if pin_name not in self.connections:
                 self.connections[pin_name] = list()
             self.connections[pin_name].append(pin_connection)
 
     def execute(self, time):
         for p, conns in self.connections.items():
             for c in conns:
-                if self.pin_states.has_key(c):
+                if c in self.pin_states:
                     self.next_pin_states[c] = self.next_pin_states[p]
+
 
 def addr_range(bits):
     for addr in xrange(2**bits):
-        yield tuple([int(x) for x in tuple(string.rjust(bin(addr)[2:], bits, '0'))])
+        yield tuple([int(x) for x in
+                     tuple(string.rjust(bin(addr)[2:], bits, '0'))])
 
 class AddressableMixin(object):
     def __init__(self, max_selector, selector_prefix='SEL'):
@@ -152,19 +167,24 @@ class AddressableMixin(object):
         selector_bits = int(math.ceil(math.log(max_selector, 2.0)))
 
         for i in range(selector_bits):
-            self._add_pin('%s%d' % (selector_prefix,i), PIN_DIRECTION_OUT, 0)
-            self._a_m_sel_pins.append('%s%d' % (selector_prefix,i))
+            pin_name = "{prefix}{nr}".format(prefix=selector_prefix, nr=i)
+            self._add_pin(pin_name,
+                          PIN_DIRECTION_OUT,
+                          0)
+            self._a_m_sel_pins.append(pin_name)
 
     def get_address(self):
-        return int("".join([str(self.next_pin_states[p]) for p in self._a_m_sel_pins]), 2)
+        return int("".join([str(self.next_pin_states[p])
+                            for p in self._a_m_sel_pins]), 2)
+
 
 class NOT(Base):
-    basename='NOT'
+    basename = 'NOT'
 
     def __init__(self, name=None):
         Base.__init__(self, name=name)
         self._add_pin('IN', PIN_DIRECTION_IN)
-        self._add_pin('OUT',PIN_DIRECTION_OUT)
+        self._add_pin('OUT', PIN_DIRECTION_OUT)
 
         self.execute(0)
         self.process_outputs(0)

@@ -4,12 +4,14 @@ import math
 sign = lambda x: math.copysign(1.0, x)
 squarewave = lambda time, period: ((1+sign(((time - period / 2) % period) - period / 2)) / 2)
 
+
 class Clock(base.Base):
-    basename='CLK'
+    basename = 'CLK'
+
     def __init__(self, period=1, phase=0, name=None):
         base.Base.__init__(self, name)
-        self._add_pin('CLK',base.PIN_DIRECTION_OUT, init_state=phase)
-        self._add_pin('RST',base.PIN_DIRECTION_IN)
+        self._add_pin('CLK', base.PIN_DIRECTION_OUT, init_state=phase)
+        self._add_pin('RST', base.PIN_DIRECTION_IN)
 
         self.init_phase = phase
         self.basetime = 0
