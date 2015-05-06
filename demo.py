@@ -2,37 +2,37 @@ import logic.clock as clock
 import logic.gate as gate
 import logic.container as container
 import logic.base as base
-import sys
 
-# This is a sort of testbed for trying out things, more than a demo. But it demonstrates
-# how to use the package system, and also how the general API works and how to write a
-# basic interface.
+# This is a sort of testbed for trying out things, more than a demo. But it
+# demonstrates how to use the package system, and also how the general API
+# works and how to write a basic interface.
+
 
 class P_DFLIPFLOP(container.Package):
-    basename='PDFF'
+    basename = 'PDFF'
 
     def __init__(self, name=None):
         container.Package.__init__(self, name)
-        self.add_pin('D',base.PIN_DIRECTION_IN)
-        self.add_pin('CLK',base.PIN_DIRECTION_IN)
-        self.add_pin('Q',base.PIN_DIRECTION_OUT)
-        self.add_pin('/Q',base.PIN_DIRECTION_OUT)
+        self.add_pin('D', base.PIN_DIRECTION_IN)
+        self.add_pin('CLK', base.PIN_DIRECTION_IN)
+        self.add_pin('Q', base.PIN_DIRECTION_OUT)
+        self.add_pin('/Q', base.PIN_DIRECTION_OUT)
 
         for i in range(4):
             self.add_gate(gate.NAND(2))
 
         self.add_gate(base.NOT())
 
-        self.connect_pin_internal_output('Q',self.contents[0], 'OUT')
-        self.connect_pin_internal_output('/Q',self.contents[1], 'OUT')
+        self.connect_pin_internal_output('Q', self.contents[0], 'OUT')
+        self.connect_pin_internal_output('/Q', self.contents[1], 'OUT')
 
-        self.contents[0].connect_pin('OUT',self.contents[1], 'IN0')
-        self.contents[1].connect_pin('OUT',self.contents[0], 'IN1')
+        self.contents[0].connect_pin('OUT', self.contents[1], 'IN0')
+        self.contents[1].connect_pin('OUT', self.contents[0], 'IN1')
 
-        self.contents[2].connect_pin('OUT',self.contents[0], 'IN0')
-        self.contents[3].connect_pin('OUT',self.contents[1], 'IN1')
+        self.contents[2].connect_pin('OUT', self.contents[0], 'IN0')
+        self.contents[3].connect_pin('OUT', self.contents[1], 'IN1')
 
-        self.contents[4].connect_pin('OUT',self.contents[3], 'IN0')
+        self.contents[4].connect_pin('OUT', self.contents[3], 'IN0')
 
         self.connect_pin_internal_input('D', self.contents[2], 'IN0')
         self.connect_pin_internal_input('D', self.contents[4], 'IN')
@@ -41,21 +41,21 @@ class P_DFLIPFLOP(container.Package):
         self.connect_pin_internal_input('CLK', self.contents[3], 'IN1')
 
 class PGEN(container.Package):
-    basename='PGEN'
+    basename = 'PGEN'
 
     def __init__(self, name=None):
         container.Package.__init__(self, name)
 
-        self.add_pin('IN',base.PIN_DIRECTION_IN)
-        self.add_pin('OUT',base.PIN_DIRECTION_OUT)
+        self.add_pin('IN', base.PIN_DIRECTION_IN)
+        self.add_pin('OUT', base.PIN_DIRECTION_OUT)
 
         self.add_gate(base.NOT())
         self.add_gate(gate.AND(2))
 
-        self.contents[0].connect_pin('OUT',self.contents[1], 'IN0')
-        self.connect_pin_internal_input('IN',self.contents[0], 'IN')
-        self.connect_pin_internal_input('IN',self.contents[1], 'IN1')
-        self.connect_pin_internal_output('OUT',self.contents[1],'OUT')
+        self.contents[0].connect_pin('OUT', self.contents[1], 'IN0')
+        self.connect_pin_internal_input('IN', self.contents[0], 'IN')
+        self.connect_pin_internal_input('IN', self.contents[1], 'IN1')
+        self.connect_pin_internal_output('OUT', self.contents[1], 'OUT')
 
 def sample(gate, pin, data, stride):
     out = list()
