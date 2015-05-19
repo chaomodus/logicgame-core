@@ -99,6 +99,7 @@ class Base(Enumerator):
         self.next_pin_states = dict()
         self.pin_info = dict()
         self.output_connections = dict()
+        self.input_wire_states = dict()
 
         self.time = init_time
 
@@ -123,7 +124,6 @@ class Base(Enumerator):
                                 self, pin_name, partner_pin))
 
     def disconnect_pin(self, pin_name, partner_boject, partner_pin):
-        #fixme
         pass
 
     def pin_changed_p(self, pin_name):
@@ -131,13 +131,23 @@ class Base(Enumerator):
 
     def recv_event(self, event):
         self.input_event_queue.append(event)
+        return True
 
     def process_inputs(self, time):
         # update next_state based on input events.
         for ev in self.input_event_queue:
             if ev.time <= time:
-                if ev.destination_pin in self.next_pin_states:
-                    self.next_pin_states[ev.destination_pin] = ev.value
+                self.input_wire_states.setdefault(ev.destination_pin, {})
+                self.input_wire_states[ev.destination_pin][(ev.origin, ev.origin_pin)] = ev.value
+        for pin in self.next_pin_states:
+            if pin in self.input_wire_states:
+                tot = 0
+                tot = sum(self.input_wire_states[pin].values())
+                if tot >= 1:
+                    self.next_pin_states[pin] = 1
+                else:
+                    self.next_pin_states[pin] = 0
+
         self.input_event_queue = list()
 
     def execute(self, time):
@@ -148,13 +158,19 @@ class Base(Enumerator):
     def process_outputs(self, time):
         # check all of the output pin states against the previous states and
         # produce update events on differences
+        cleanup = list()
         for pin, value in self.next_pin_states.iteritems():
             if self.pin_states[pin] != value:
                 if pin in self.output_connections:
                     for conn in self.output_connections[pin]:
                         newev = Event(time, value, self, pin, conn.pin_name)
-                        conn.send_event(newev)
+                        if not conn.send_event(newev):
+                            # our partner is gone
+                            cleanup.append((pin, conn))
                     self.pin_states[pin] = value
+        # cleanup dead partners
+        for outpin, conn in cleanup:
+            self.output_connections[outpin].remove(conn)
 
 
 class Passthrough(Base):

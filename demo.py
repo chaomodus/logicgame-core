@@ -40,6 +40,27 @@ class P_DFLIPFLOP(container.Package):
         self.connect_pin_internal_input('CLK', self.contents[2], 'IN1')
         self.connect_pin_internal_input('CLK', self.contents[3], 'IN1')
 
+
+class PJKFF(container.Package):
+    basename = 'PJKFF'
+
+    def __init__(self, name=None):
+        container.Package.__init__(self, name)
+
+        self.add_pin('J', base.PIN_DIRECTION_IN)
+        self.add_pin('K', base.PIN_DIRECTION_IN)
+        self.add_pin('CLK', base.PIN_DIRECTION_IN)
+
+        self.add_pin('Q', base.PIN_DIRECTION_OUT)
+        self.add_pin('/Q', base.PIN_DIRECTION_OUT)
+
+        self.add_gate(gate.NAND(3))
+        self.add_gate(gate.NAND(3))
+
+        self.add_gate(gate.NAND(2))
+        self.add_gate(gate.NAND(2))
+
+
 class PGEN(container.Package):
     basename = 'PGEN'
 
@@ -57,6 +78,7 @@ class PGEN(container.Package):
         self.connect_pin_internal_input('IN', self.contents[1], 'IN1')
         self.connect_pin_internal_output('OUT', self.contents[1], 'OUT')
 
+
 def sample(gate, pin, data, stride):
     out = list()
     s = stride
@@ -71,6 +93,7 @@ def sample(gate, pin, data, stride):
         s -= 1
     return out
 
+
 def format_data(dat):
     out = ''
     for i in dat:
@@ -84,21 +107,25 @@ c0 = clock.Clock(1253)
 c1 = clock.Clock(2000)
 divider = P_DFLIPFLOP()
 pgen = PGEN()
+n1 = base.NOT()
+c0.connect_pin('CLK', n1, 'IN')
+c1.connect_pin('CLK', n1, 'IN')
+c0.connect_pin('CLK', divider, 'CLK')
+c1.connect_pin('CLK', divider, 'D')
+c0.connect_pin('CLK', pgen, 'IN')
+# divider.connect_pin('/Q', divider, 'D')
 
-c0.connect_pin('CLK',divider,'CLK')
-c1.connect_pin('CLK',divider, 'D')
-c0.connect_pin('CLK',pgen,'IN')
-#divider.connect_pin('/Q', divider, 'D')
-
-s = container.Simulator()
+s = container.CaptureSimulator()
 s.add_gate(c0)
 s.add_gate(c1)
 s.add_gate(divider)
 s.add_gate(pgen)
+s.add_gate(n1)
 
-s.simulate(0,8000)
+s.simulate(0, 8000)
 
-print format_data(sample('CLK0','CLK',s.data, 100))
-print format_data(sample('CLK1','CLK',s.data, 100))
-print format_data(sample('PDFF0','Q',s.data, 100))
-print format_data(sample('PDFF0','/Q',s.data, 100))
+print format_data(sample('CLK0', 'CLK', s.data, 100))
+print format_data(sample('CLK1', 'CLK', s.data, 100))
+print format_data(sample('PDFF0', 'Q', s.data, 100))
+print format_data(sample('PDFF0', '/Q', s.data, 100))
+print format_data(sample(n1.name, 'OUT', s.data, 100))

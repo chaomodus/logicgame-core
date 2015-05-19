@@ -49,7 +49,7 @@ class Package(base.Enumerator, Container):
         self.OUTPUTS.execute(tm)
 
     def recv_event(self, event):
-        self.INPUTS.recv_event(event)
+        return self.INPUTS.recv_event(event)
 
     def connect_pin(self, pin_name, partner_object, partner_pin):
         self.OUTPUTS.connect_pin(pin_name, partner_object, partner_pin)
