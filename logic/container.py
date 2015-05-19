@@ -3,6 +3,7 @@
 
 from . import base
 
+
 class Container(object):
     """Base container class which properly sequences the execution of its contents.
        Does not fully implement the base protocol (does not itself act as a
@@ -13,6 +14,12 @@ class Container(object):
 
     def add_gate(self, gate):
         self.contents.append(gate)
+
+    def remove_gate(self, gate):
+        try:
+            self.contents.remove(gate)
+        except ValueError:
+            pass
 
     def execute(self, tm):
         [g.process_inputs(tm) for g in self.contents]
@@ -89,15 +96,18 @@ class Simulator(Container):
 
        Does not act as a gate."""
 
-    def __init__(self):
-        Container.__init__(self)
-        self.data = list()
-
     def simulate(self, basetime=0, ticks=1):
         t = basetime
         while t < (basetime + ticks):
             self.execute(t)
             t += 1
+
+
+# example simuator that records the state of each gate each execution cycle
+class CaptureSimulator(Simulator):
+    def __init__(self):
+        Simulator.__init__(self)
+        self.data = []
 
     def execute(self, tm):
         Container.execute(self, tm)

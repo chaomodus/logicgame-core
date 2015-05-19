@@ -6,6 +6,7 @@ PIN_DIRECTION_OUT = 1
 
 import string
 import math
+import weakref
 
 invert = {0: 1, 1: 0}
 
@@ -34,17 +35,22 @@ class Event(object):
 class Pin(object):
     """Represents a pin, holder of connectivity state."""
     def __init__(self, pin_holder, pin_name):
-        self.pin_holder = pin_holder
+        self.pin_holder = weakref.ref(pin_holder)
         self.pin_name = pin_name
 
     def __eq__(self, other):
-        return (self.pin_holder == other.pin_holder) and (self.pin_name == other.pin_name)
+        return (self.pin_holder() == other.pin_holder()) and (self.pin_name == other.pin_name)
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def partner_alive(self):
+        return not (self.pin_holder() is None)
+
     def send_event(self, event):
-        return self.pin_holder.recv_event(event)
+        if self.partner_alive():
+            return self.pin_holder().recv_event(event)
+        return None
 
 
 class Enumerator(object):
@@ -116,6 +122,10 @@ class Base(Enumerator):
                                 self.pin_states[pin_name],
                                 self, pin_name, partner_pin))
 
+    def disconnect_pin(self, pin_name, partner_boject, partner_pin):
+        #fixme
+        pass
+
     def pin_changed_p(self, pin_name):
         return self.next_pin_states[pin_name] != self.pin_states[pin_name]
 
@@ -170,12 +180,22 @@ class Passthrough(Base):
                     self.next_pin_states[c] = self.next_pin_states[p]
 
 
+class Buffer(Passthrough):
+    basename = 'BUF'
+
+    def __init__(self, name=None):
+        Passthrough.__init__(self, name)
+        self.add_pin('OUT', PIN_DIRECTION_OUT, None)
+        self.add_pin('IN', PIN_DIRECTION_IN, 'OUT')
+
+
 def addr_range(bits):
     """Generate a bitmap for each enumerated address for a given number of
        bits."""
     for addr in xrange(2**bits):
         yield tuple([int(x) for x in
                      tuple(string.rjust(bin(addr)[2:], bits, '0'))])
+
 
 class AddressableMixin(object):
     """A mixin which adds SELn inputs to a gate for selecting an enumerated

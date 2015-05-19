@@ -10,7 +10,7 @@ from . import lut
 
 
 @staticvariable('cnt', 0)
-def AND(bits, name=None):
+def AND(bits=2, name=None):
     if not name:
         name = 'AND' + str(AND.cnt)
         AND.cnt += 1
@@ -19,7 +19,7 @@ def AND(bits, name=None):
 
 
 @staticvariable('cnt', 0)
-def OR(bits, name=None):
+def OR(bits=2, name=None):
     if not name:
         name = 'OR' + str(OR.cnt)
         OR.cnt += 1
@@ -28,7 +28,7 @@ def OR(bits, name=None):
 
 
 @staticvariable('cnt', 0)
-def NOR(bits, name=None):
+def NOR(bits=2, name=None):
     if not name:
         name = 'NOR' + str(NOR.cnt)
         NOR.cnt += 1
@@ -37,7 +37,7 @@ def NOR(bits, name=None):
 
 
 @staticvariable('cnt', 0)
-def NAND(bits, name=None):
+def NAND(bits=2, name=None):
     if not name:
         name = 'NAND' + str(NAND.cnt)
         NAND.cnt += 1
@@ -46,7 +46,7 @@ def NAND(bits, name=None):
 
 
 @staticvariable('cnt', 0)
-def XOR(bits, name=None):
+def XOR(bits=2, name=None):
     if not name:
         name = 'XOR' + str(XOR.cnt)
         XOR.cnt += 1
@@ -55,7 +55,7 @@ def XOR(bits, name=None):
 
 
 @staticvariable('cnt', 0)
-def XNOR(bits, name=None):
+def XNOR(bits=2, name=None):
     if not name:
         name = 'XNOR' + str(XNOR.cnt)
         XNOR.cnt += 1
