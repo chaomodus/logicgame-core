@@ -95,15 +95,24 @@ class Base(Enumerator):
 
         self.input_event_queue = list()
 
+        # format: {pin name: 1/0, ...}
         self.pin_states = dict()
         self.next_pin_states = dict()
+
+        # format {pin name: {'direction':DIRECTION, 'init_state': default value}, ...}
         self.pin_info = dict()
+
+        # format {pin_name: (Pin(), ...), ...}
         self.output_connections = dict()
+
+        # format {pin_name: {(partner obj, partner pin name): 1/0, ...)}, ...}
         self.input_wire_states = dict()
 
         self.time = init_time
 
     def _add_pin(self, pin_name, pin_direction, init_state=0):
+        """Internal use. Descendents of this class should call this to add
+           pins."""
         if pin_name in self.pin_info:
             raise DuplicatePinError()
         self.pin_states[pin_name] = init_state
@@ -114,6 +123,8 @@ class Base(Enumerator):
             self.output_connections[pin_name] = list()
 
     def connect_pin(self, pin_name, partner_object, partner_pin):
+        """Connect an output pin pin_name to a partner object's input pin
+           partner_pin."""
         newpin = Pin(partner_object, partner_pin)
         for p in self.output_connections[pin_name]:
             if newpin == p:
@@ -123,17 +134,55 @@ class Base(Enumerator):
                                 self.pin_states[pin_name],
                                 self, pin_name, partner_pin))
 
-    def disconnect_pin(self, pin_name, partner_boject, partner_pin):
+    def disconnect_pin(self, pin_name, partner_object, partner_pin):
+        """Remove a connection to partner_oject from pin_name."""
+        if pin_name in self.output_connections:
+            for pin_obj in self.output_connections[pin_name]:
+                if (pin_obj.pin_holder() is partner_object) and (pin_obj.pin_name == partner_pin):
+                    self.output_connections.remove(pin_obj)
+                    return partner_object.on_disconnected(partner_pin, self, pin_name)
+
+    def disconnect_all(self, partner_object):
+        """Repeatedly calls disconnect_pin for each pin connected to
+           partner_object."""
+        for pin in self.output_connections:
+            cleanup = []
+            for pin_obj in self.output_connections[pin]:
+                if pin_obj.pin_holder() is partner_object:
+                    cleanup.append(pin_obj)
+            for item in cleanup:
+                self.output_connections[pin].remove(item)
+                if item.pin_holder() is not None:
+                    item.pin_holder().on_disconnected(item.pin_name, self, pin)
+
+    def on_connected(self, pin_name, partner_object, partner_pin):
+        """Called when the output pin from a separate gate connects to this
+           object."""
         pass
 
+    def on_disconnected(self, pin_name, partner_object, partner_pin):
+        """Called when the output pin from a separate gate disconnects from
+           this object.
+
+           By default cleans up input wires.
+        """
+        if pin_name in self.input_wire_states:
+            if (partner_object, partner_pin) in self.input_wire_states[pin_name]:
+                del self.input_wire_states[pin_name][(partner_object, partner_pin)]
+
     def pin_changed_p(self, pin_name):
+        """Returns True if the given local pin has changed since last cycle."""
         return self.next_pin_states[pin_name] != self.pin_states[pin_name]
 
     def recv_event(self, event):
+        """Append an event into the input event queue. Protocol dictates that
+           if it's successful it must return True."""
         self.input_event_queue.append(event)
         return True
 
     def process_inputs(self, time):
+        """Updates wire state cache based on input events and then next_pin_states
+           based on wire states."""
         # update next_state based on input events.
         for ev in self.input_event_queue:
             if ev.time <= time:
@@ -151,13 +200,16 @@ class Base(Enumerator):
         self.input_event_queue = list()
 
     def execute(self, time):
-        # to be implemented by the gates in question (examine next input states
-        # and update output states based on differences).
+        """To be implemented by downstream gates. Basically, examine input pins
+           in next_pin_states and update output pins in next_pin_states."""
         raise NotImplementedError()
 
     def process_outputs(self, time):
-        # check all of the output pin states against the previous states and
-        # produce update events on differences
+        """Checks the states of output pins in next_pin_states and sends events
+           on any changed pins.
+
+           Also performs a cleanup step on any dead output pins.
+        """
         cleanup = list()
         for pin, value in self.next_pin_states.iteritems():
             if self.pin_states[pin] != value:
