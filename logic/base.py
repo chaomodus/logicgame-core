@@ -130,6 +130,7 @@ class Base(Enumerator):
             if newpin == p:
                 return None
         self.output_connections[pin_name].append(newpin)
+        partner_object.on_connected(partner_pin, self, pin_name)
         newpin.send_event(Event(self.time,
                                 self.pin_states[pin_name],
                                 self, pin_name, partner_pin))
