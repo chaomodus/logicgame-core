@@ -51,14 +51,26 @@ class Package(base.Enumerator, Container):
     def recv_event(self, event):
         return self.INPUTS.recv_event(event)
 
+    def on_connected(self, pin_name, partner_object, partner_pin):
+        return self.INPUTS.on_connected(pin_name, partner_object, partner_pin)
+
+    def on_disconnected(self, pin_name, partner_object, partner_pin):
+        return self.INPUTS.on_disconnected(pin_name, partner_object, partner_pin)
+
+    def disconnect_pin(self, pin_name, partner_object, partner_pin):
+        return self.OUTPUTS.disconnect_pin(pin_name, partner_object, partner_pin)
+
+    def disconnect_all(self, partner_object):
+        return self.OUTPUTS.disconnect_all(partner_object)
+
     def connect_pin(self, pin_name, partner_object, partner_pin):
-        self.OUTPUTS.connect_pin(pin_name, partner_object, partner_pin)
+        return self.OUTPUTS.connect_pin(pin_name, partner_object, partner_pin)
 
     def process_inputs(self, tm):
-        self.INPUTS.process_inputs(tm)
+        return self.INPUTS.process_inputs(tm)
 
     def process_outputs(self, tm):
-        self.OUTPUTS.process_outputs(tm)
+        return self.OUTPUTS.process_outputs(tm)
 
     def add_pin(self, pin, pin_direction):
         if pin_direction == base.PIN_DIRECTION_IN:
@@ -88,7 +100,6 @@ class Package(base.Enumerator, Container):
         outp = self.INPUTS.pin_states.copy()
         outp.update(self.OUTPUTS.pin_states)
         return outp
-
 
 class Simulator(Container):
     """A container intended to be the starting point for implementing or
